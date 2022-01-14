@@ -3,3 +3,7 @@
 inventory.tmpl
 .terraform.lock.hcl
 wpserver.pub
+.terraform.lock.hcl
+terraform.tfstate.backup
+terraform.tfstate
+hosts.ini

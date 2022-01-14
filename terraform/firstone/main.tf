@@ -1,5 +1,5 @@
 terraform {
-  required_version = "=1.0"
+  required_version = ">=1.0"
 }
 
 provider "aws" {
@@ -38,12 +38,12 @@ resource "aws_security_group" "mainsecgroup" {
 #creating key-pair for logging into EC2 in us-east-1
 resource "aws_key_pair" "worker-key" {
   key_name   = "wpserver"
-  public_key = file("${path.module}/wpserver.pub")
+  public_key = file("~/.ssh/wpserver.pub")
 }
 
 #creating aws_instance
 resource "aws_instance" "app_server" {
-  ami           = "ami-0e472ba40eb589f49"
+  ami           = "ami-04505e74c0741db8d"
   instance_type = "t2.micro"
   security_groups = ["${aws_security_group.mainsecgroup.name}"]
   key_name = "wpserver"
@@ -51,17 +51,25 @@ resource "aws_instance" "app_server" {
     Name = "wpserver"
   }
 
-  user_data = <<EOD
-#!/bin/bash
-sudo apt-get update -y
-sudo apt install software-properties-common -y
-sudo apt-add-repository ppa:ansible/ansible -y
-sudo apt update -y",
-sudo apt install git -y",
-git clone https://github.com/xmegadezerx/wpserver-lx4241.git /tmp/wp
-sudo apt install ansible -y
-ansible-playbook /tmp/wp/ansible/wordpress/playbook.yml
-EOD
+   connection {
+    type        = "ssh"
+    user        = "ubuntu"
+    private_key = "${file("~/.ssh/wpserver")}"
+    host        = "${self.public_ip}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update -y",
+      "sudo apt install software-properties-common -y",
+      "sudo apt-add-repository ppa:ansible/ansible -y",
+      "sudo apt update -y",
+      "sudo apt install git -y",
+      "git clone https://github.com/xmegadezerx/wpserver-lx4241.git /tmp/wp",
+      "sudo apt install ansible -y",
+      "ansible-playbook /tmp/wp/ansible/wordpress/playbook.yml"
+    ]
+  }
 }
 
 module "bastion" {
