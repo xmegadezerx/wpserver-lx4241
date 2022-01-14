@@ -1,0 +1,5 @@
+.DS_Store
+/terraform/firstone/.terraform
+inventory.tmpl
+.terraform.lock.hcl
+wpserver.pub

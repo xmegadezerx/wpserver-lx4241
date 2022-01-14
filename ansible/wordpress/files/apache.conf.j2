@@ -1,0 +1,16 @@
+<VirtualHost *:{{ http_port }}>
+    ServerAdmin webmaster@localhost
+    ServerName (% for domain in {{ http_domain }} %) {{ domain }} (% endfor %)
+    DocumentRoot {{ http_folder }}/wordpress
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    <Directory {{ http_folder }}>
+          Options -Indexes
+          AllowOverride All
+    </Directory>
+
+    <IfModule mod_dir.c>
+        DirectoryIndex index.php index.html index.htm
+    </IfModule>
+</VirtualHost>
